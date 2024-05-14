@@ -1,0 +1,34 @@
+const JeuneDiplome = artifacts.require("JeuneDiplome");
+
+contract('JeuneDiplome', accounts => {
+  let jeuneDiplomeInstance;
+
+  before(async () => {
+    jeuneDiplomeInstance = await JeuneDiplome.deployed();
+  });
+
+  it('doit ajouter un diplôme correctement et incrémenter NbDiplomes', async () => {
+    // Supposons que l'établissement et l'étudiant existent déjà et ont des ID valides
+    const etablissementId = 1;  // Assurez-vous que cet ID est valide dans votre environnement de test
+    const etudiantId = 1;       // Assurez-vous que cet ID est valide dans votre environnement de test
+
+    // Ajouter un étudiant pour les besoins du test
+    await jeuneDiplomeInstance.ajouter_etudiant("Nadir", "Maayoufi", {from: accounts[0]});
+    // Ajouter un établissement pour les besoins du test
+    await jeuneDiplomeInstance.ajouter_etablisement("Ynov", {from: accounts[0]});
+
+    // Obtenir le nombre initial de diplômes
+    const initialCount = await jeuneDiplomeInstance.NbDiplomes();
+
+    // Appeler la fonction ajouter_diplome
+    await jeuneDiplomeInstance.ajouter_diplome(etudiantId, {from: accounts[0]});
+
+    // Vérifier le nouveau compte de diplômes
+    const newCount = await jeuneDiplomeInstance.NbDiplomes();
+    assert.equal(newCount.toNumber(), initialCount.toNumber() + 1, "NbDiplomes n'a pas été incrémenté correctement");
+
+    // Vérifier les détails du diplôme ajouté
+    const diplomeAdded = await jeuneDiplomeInstance.Diplomes(newCount);
+    assert.equal(diplomeAdded.id_titulaire, etudiantId, "L'ID du titulaire du diplôme n'est pas correct");
+  });
+});
